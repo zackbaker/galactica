@@ -5,9 +5,10 @@ class Base:
         self.velocity = None
         self.img = None
         self.laser_img = None
+        self.mask = None
         self.cool_down = 0
 
-    def write(self, window):
+    def draw(self, window):
         # Maybe move this? it's the only function in this class that gets called every frame
         if self.cool_down != 0 and self.cool_down < 30:
             self.cool_down += 1

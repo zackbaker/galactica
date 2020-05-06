@@ -33,7 +33,7 @@ class Game:
         self.level = 0
         self.enemy_increment = 2
         # Full percentage, chance enemy will not shoot
-        self.enemy_shoot_chance = 99
+        self.enemy_shoot_chance = 96
 
     def main_menu(self):
         menu_font = self.small_font.render('Press any key to start', True, self.COLORS['white'])
@@ -77,9 +77,18 @@ class Game:
                 self.level += 1
                 self.add_enemies()
 
+            for laser in self.lasers['player']:
+                for enemy in self.enemies:
+                    if self.check_collision(laser, enemy):
+                        self.lasers['player'].remove(laser)
+                        self.enemies.remove(enemy   )
+            self.move_lasers()
+            self.move_enemies()
+            self.enemy_shoot()
+
             keys = pygame.key.get_pressed()
             self.check_player_inputs(keys)
-            self.write()
+            self.draw()
 
     def add_enemies(self):
         num_of_enemies = self.enemy_increment * ceil(self.level / 2)
@@ -88,6 +97,39 @@ class Game:
             enemy.x = random.randint(0, self.width - enemy.get_width())
             enemy.y = random.randint(-100 * num_of_enemies, -100)
             self.enemies.append(enemy)
+
+    def move_lasers(self):
+        for (laser_group, lasers) in self.lasers.items():
+            for laser in lasers:
+                if (laser.y + laser.get_height()) < 0 or laser.y > self.height:
+                    self.lasers[laser_group].remove(laser)
+
+                if laser_group == 'player':
+                    laser.move('up')
+                elif laser_group == 'enemy':
+                    laser.move('down')
+
+    def check_collision(self, obj1, obj2):
+        offset_x = round(obj2.x - obj1.x)
+        offset_y = round(obj2.y - obj1.y)
+        intersect = obj1.mask.overlap(obj2.mask, (offset_x, offset_y))
+        if intersect is None:
+            return False
+        else:
+            return True
+
+    def move_enemies(self):
+        for enemy in self.enemies:
+            if enemy.y > self.height:
+                self.enemies.remove(enemy)
+            else:
+                enemy.move()
+
+    def enemy_shoot(self):
+        for enemy in self.enemies:
+            if (random.randint(0, 100) + random.randint(0, 100)) / 2 > self.enemy_shoot_chance and enemy.can_shoot():
+                # TODO get rid of the minus 10 by trimming enemy ships down
+                self.lasers['enemy'].append(Laser(enemy.x + (enemy.get_width() / 2 - 10), enemy.y, enemy.laser_img))
 
     def check_player_inputs(self, keys):
         if (keys[pygame.K_w] or keys[pygame.K_UP]) and 0 < (self.player.y + self.player.velocity):
@@ -107,36 +149,19 @@ class Game:
                 Laser(self.player.x + ((self.player.get_width() / 2) - 10), self.player.y, self.player.laser_img)
             )
 
-    def write(self):
+    def draw(self):
         self.window.blit(self.bg, (0, 0))
         level_font = self.small_font.render('Level: {level}'.format(level=self.level), True, self.COLORS['white'])
         self.window.blit(level_font, (self.width - (level_font.get_width() + 10), 10))
 
         for (laser_group, lasers) in self.lasers.items():
             for laser in lasers:
-                if laser_group == 'player':
-                    if (laser.y + laser.get_height()) < 0:
-                        self.lasers['player'].remove(laser)
-
-                    laser.move('up')
-                elif laser_group == 'enemy':
-                    if laser.y > self.height:
-                        self.lasers['enemy'].remove(laser)
-
-                    laser.move('down')
-                laser.write(self.window)
+                laser.draw(self.window)
 
         for enemy in self.enemies:
-            if enemy.y > self.height:
-                self.enemies.remove(enemy)
-            else:
-                if random.randint(0, 100) > self.enemy_shoot_chance and enemy.can_shoot():
-                    # TODO get rid of the minus 10 by trimming enemy ships down
-                    self.lasers['enemy'].append(Laser(enemy.x + (enemy.get_width() / 2 - 10), enemy.y, enemy.laser_img))
-                enemy.move()
-                enemy.write(self.window)
+            enemy.draw(self.window)
 
-        self.player.write(self.window)
+        self.player.draw(self.window)
 
         pygame.display.update()
 

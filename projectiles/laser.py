@@ -18,7 +18,7 @@ class Laser:
         elif direction == 'down':
             self.y += self.velocity
 
-    def write(self, window):
+    def draw(self, window):
         window.blit(self.img, (self.x, self.y))
 
     def get_height(self):
