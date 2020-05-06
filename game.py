@@ -1,7 +1,10 @@
 import sys
+import random
+from math import ceil
 
 import pygame
 
+from ships.enemy import Enemy
 from ships.player import Player
 
 
@@ -24,8 +27,10 @@ class Game:
         self.small_font = pygame.font.SysFont(self.font, 18)
 
         self.player = None
-        self.enemies = None
-        self.lasers = None
+        self.enemies = []
+        self.lasers = []
+        self.level = 0
+        self.enemy_increment = 2
 
     def main_menu(self):
         menu_font = self.small_font.render('Press any key to start', True, self.COLORS['white'])
@@ -65,23 +70,46 @@ class Game:
                 if event.type == pygame.QUIT:
                     sys.exit()
 
+            if len(self.enemies) == 0:
+                self.level += 1
+                self.add_enemies()
+
             keys = pygame.key.get_pressed()
             self.check_player_movement(keys)
-
             self.write()
 
+    def add_enemies(self):
+        num_of_enemies = self.enemy_increment * ceil(self.level / 2)
+        for i in range(0, num_of_enemies):
+            enemy = Enemy(-10000, -10000)
+            enemy.x = random.randint(0, self.width - enemy.get_width())
+            enemy.y = random.randint(-100 * num_of_enemies, -100)
+            self.enemies.append(enemy)
+
     def check_player_movement(self, keys):
-        if keys[pygame.K_w] and 0 < (self.player.y + self.player.velocity):
+        if (keys[pygame.K_w] or keys[pygame.K_UP]) and 0 < (self.player.y + self.player.velocity):
             self.player.y -= self.player.velocity
-        if keys[pygame.K_s] and self.height > ((self.player.y + self.player.get_height()) + self.player.velocity):
+        if (keys[pygame.K_s] or keys[pygame.K_DOWN]) \
+                and self.height > ((self.player.y + self.player.get_height()) + self.player.velocity):
             self.player.y += self.player.velocity
-        if keys[pygame.K_a] and 0 < (self.player.x + self.player.velocity):
+        if (keys[pygame.K_a] or keys[pygame.K_LEFT]) and 0 < (self.player.x + self.player.velocity):
             self.player.x -= self.player.velocity
-        if keys[pygame.K_d] and self.width > ((self.player.x + self.player.get_width()) + self.player.velocity):
+        if (keys[pygame.K_d] or keys[pygame.K_RIGHT]) \
+                and self.width > ((self.player.x + self.player.get_width()) + self.player.velocity):
             self.player.x += self.player.velocity
 
     def write(self):
         self.window.blit(self.bg, (0, 0))
+        level_font = self.small_font.render('Level: {level}'.format(level=self.level), True, self.COLORS['white'])
+        self.window.blit(level_font, (self.width - (level_font.get_width() + 10), 10))
+
+        for enemy in self.enemies:
+            if enemy.y > self.height:
+                self.enemies.remove(enemy)
+            else:
+                enemy.move()
+                enemy.write(self.window)
+
         self.player.write(self.window)
 
         pygame.display.update()

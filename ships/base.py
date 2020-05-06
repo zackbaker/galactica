@@ -2,7 +2,7 @@ class Base:
     def __init__(self, x, y):
         self.x = x
         self.y = y
-        self.velocity = 5
+        self.velocity = None
         self.img = None
 
     def write(self, window):
