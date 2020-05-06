@@ -32,6 +32,8 @@ class Game:
         self.lasers = {'player': [], 'enemy': []}
         self.level = 0
         self.enemy_increment = 2
+        # Full percentage, chance enemy will not shoot
+        self.enemy_shoot_chance = 99
 
     def main_menu(self):
         menu_font = self.small_font.render('Press any key to start', True, self.COLORS['white'])
@@ -101,8 +103,7 @@ class Game:
         if keys[pygame.K_SPACE] and self.player.can_shoot():
             # TODO: Trim up images and get rid of the + 10
             # minus 10 is to get the laser to line up with the center of the ship
-            laser = Laser(self.player.x + ((self.player.get_width() / 2) - 10), self.player.y)
-            self.lasers['player'].append(laser)
+            self.lasers['player'].append(Laser(self.player.x + ((self.player.get_width() / 2) - 10), self.player.y))
 
     def write(self):
         self.window.blit(self.bg, (0, 0))
@@ -111,13 +112,25 @@ class Game:
 
         for (laser_group, lasers) in self.lasers.items():
             for laser in lasers:
-                laser.move('up')
+                if laser_group == 'player':
+                    if (laser.y + laser.get_height()) < 0:
+                        self.lasers['player'].remove(laser)
+
+                    laser.move('up')
+                elif laser_group == 'enemy':
+                    if laser.y > self.height:
+                        self.lasers['enemy'].remove(laser)
+
+                    laser.move('down')
                 laser.write(self.window)
 
         for enemy in self.enemies:
             if enemy.y > self.height:
                 self.enemies.remove(enemy)
             else:
+                if random.randint(0, 100) > self.enemy_shoot_chance and enemy.can_shoot():
+                    # TODO get rid of the minus 10 by trimming enemy ships down
+                    self.lasers['enemy'].append(Laser(enemy.x + (enemy.get_width() / 2 - 10), enemy.y))
                 enemy.move()
                 enemy.write(self.window)
 
