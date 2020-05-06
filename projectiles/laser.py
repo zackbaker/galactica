@@ -19,3 +19,6 @@ class Laser:
 
     def write(self, window):
         window.blit(self.img, (self.x, self.y))
+
+    def get_height(self):
+        return self.img.get_height()
