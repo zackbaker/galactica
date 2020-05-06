@@ -13,3 +13,4 @@ class Player(Base):
         # TODO: Figure this mess out. See if there is a better way
         dirname = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
         self.img = pygame.image.load(os.path.join(dirname, 'assets', 'player_ship.png'))
+        self.mask = pygame.mask.from_surface(self.img)
