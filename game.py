@@ -4,6 +4,7 @@ from math import ceil
 
 import pygame
 
+from projectiles.laser import Laser
 from ships.enemy import Enemy
 from ships.player import Player
 
@@ -28,7 +29,7 @@ class Game:
 
         self.player = None
         self.enemies = []
-        self.lasers = []
+        self.lasers = {'player': [], 'enemy': []}
         self.level = 0
         self.enemy_increment = 2
 
@@ -75,7 +76,7 @@ class Game:
                 self.add_enemies()
 
             keys = pygame.key.get_pressed()
-            self.check_player_movement(keys)
+            self.check_player_inputs(keys)
             self.write()
 
     def add_enemies(self):
@@ -86,7 +87,7 @@ class Game:
             enemy.y = random.randint(-100 * num_of_enemies, -100)
             self.enemies.append(enemy)
 
-    def check_player_movement(self, keys):
+    def check_player_inputs(self, keys):
         if (keys[pygame.K_w] or keys[pygame.K_UP]) and 0 < (self.player.y + self.player.velocity):
             self.player.y -= self.player.velocity
         if (keys[pygame.K_s] or keys[pygame.K_DOWN]) \
@@ -97,11 +98,21 @@ class Game:
         if (keys[pygame.K_d] or keys[pygame.K_RIGHT]) \
                 and self.width > ((self.player.x + self.player.get_width()) + self.player.velocity):
             self.player.x += self.player.velocity
+        if keys[pygame.K_SPACE] and self.player.can_shoot():
+            # TODO: Trim up images and get rid of the + 10
+            # minus 10 is to get the laser to line up with the center of the ship
+            laser = Laser(self.player.x + ((self.player.get_width() / 2) - 10), self.player.y)
+            self.lasers['player'].append(laser)
 
     def write(self):
         self.window.blit(self.bg, (0, 0))
         level_font = self.small_font.render('Level: {level}'.format(level=self.level), True, self.COLORS['white'])
         self.window.blit(level_font, (self.width - (level_font.get_width() + 10), 10))
+
+        for (laser_group, lasers) in self.lasers.items():
+            for laser in lasers:
+                laser.move('up')
+                laser.write(self.window)
 
         for enemy in self.enemies:
             if enemy.y > self.height:
