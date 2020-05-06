@@ -4,6 +4,7 @@ class Base:
         self.y = y
         self.velocity = None
         self.img = None
+        self.laser_img = None
         self.cool_down = 0
 
     def write(self, window):
