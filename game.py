@@ -103,7 +103,9 @@ class Game:
         if keys[pygame.K_SPACE] and self.player.can_shoot():
             # TODO: Trim up images and get rid of the + 10
             # minus 10 is to get the laser to line up with the center of the ship
-            self.lasers['player'].append(Laser(self.player.x + ((self.player.get_width() / 2) - 10), self.player.y))
+            self.lasers['player'].append(
+                Laser(self.player.x + ((self.player.get_width() / 2) - 10), self.player.y, self.player.laser_img)
+            )
 
     def write(self):
         self.window.blit(self.bg, (0, 0))
@@ -130,7 +132,7 @@ class Game:
             else:
                 if random.randint(0, 100) > self.enemy_shoot_chance and enemy.can_shoot():
                     # TODO get rid of the minus 10 by trimming enemy ships down
-                    self.lasers['enemy'].append(Laser(enemy.x + (enemy.get_width() / 2 - 10), enemy.y))
+                    self.lasers['enemy'].append(Laser(enemy.x + (enemy.get_width() / 2 - 10), enemy.y, enemy.laser_img))
                 enemy.move()
                 enemy.write(self.window)
 
