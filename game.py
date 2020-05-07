@@ -17,8 +17,10 @@ class Game:
         pygame.init()
         self.width = 800
         self.height = 600
-        self.bg = pygame.transform.scale(pygame.image.load('assets/bg.png'), (self.width, self.height))
         self.window = pygame.display.set_mode((self.width, self.height))
+        pygame.display.set_caption('Space Invaders')
+
+        self.bg = pygame.transform.scale(pygame.image.load('assets/bg.png'), (self.width, self.height))
         self.clock = pygame.time.Clock()
 
         pygame.font.init()
