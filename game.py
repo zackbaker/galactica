@@ -41,7 +41,7 @@ class Game:
     def main_menu(self):
         menu_font = self.small_font.render('Press any key to start', True, self.COLORS['white'])
         instructions_font = self.med_font.render(
-            'Use wasd keys to move and space bar to shoot',
+            'Use wasd or arrow keys to move and space bar to shoot',
             True,
             self.COLORS['white']
         )
