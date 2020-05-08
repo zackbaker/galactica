@@ -129,6 +129,8 @@ class Game:
                     self.score += 1
 
             if self.player.health <= 0:
+                self.lasers = []
+                self.enemies = []
                 self.game_over()
                 break
 
